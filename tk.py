@@ -2,6 +2,8 @@ from tkinter import *
 
 
 def digitaldetect(str):
+    if str == '':
+        return False
     for i in str:
         if i < '0' or i > '9':
             return False
