@@ -1,11 +1,18 @@
 from tkinter import *
-import time
+
+
+def digitaldetect(str):
+    for i in str:
+        if i < '0' or i > '9':
+            return False
+    return True
+
 
 class Application(Frame):
     def __init__(self, master):
         self.blueteamname = ''
         self.redteamname = ''
-        self.root =  master
+        self.root = master
         self.count = False
         self.commited = False
         self.minset = 0
@@ -20,6 +27,7 @@ class Application(Frame):
         self.round = 1
         self.createcontrolinterface(self.root)
         self.createentry()
+        self.createinfowindow()
 
     def createcontrolinterface(self, master):
         super().__init__(master)
@@ -73,7 +81,7 @@ class Application(Frame):
                                   font="Consolas 20 bold")
         self.redfoullabel.grid(row=2, column=0)
         self.bluectl = Frame(self)
-        self.bluectl.grid(row=3, column=0)
+        self.bluectl.grid(row=2, column=0)
         self.blue1btn = Button(self.bluectl,
                                text="1",
                                fg='white',
@@ -115,7 +123,7 @@ class Application(Frame):
                                   command=self.bluefouladd)
         self.bluefoulbtn.grid(row=3, column=0)
         self.matchctl = Frame(self)
-        self.matchctl.grid(row=3, column=1)
+        self.matchctl.grid(row=2, column=1)
         self.matchstartbtn = Button(self.matchctl, text="Start",
                                     width=15,
                                     height=3,
@@ -131,7 +139,7 @@ class Application(Frame):
                                    command=self.matchstop)
         self.matchstopbtn.grid(row=1, column=0)
         self.redctl = Frame(self)
-        self.redctl.grid(row=3, column=2)
+        self.redctl.grid(row=2, column=2)
         self.red1btn = Button(self.redctl,
                               text="1",
                               fg='white',
@@ -225,26 +233,27 @@ class Application(Frame):
         self.red2btn['state'] = 'normal'
         self.red3btn['state'] = 'normal'
         self.redfoulbtn['state'] = 'normal'
+        self.timercount()
 
-        def count():
-            if (self.count):
-                if (self.sec <= 0 and self.min <= 0):
-                    self.matchstop()
-                    self.round += 1
-                    self.roundlabel['text'] = 'Round ' + str(self.round)
-                    self.min = self.minset
-                    self.sec = self.secset
-                    if self.round > self.roundnum:
-                        self.matchstartbtn['state'] = 'disabled'
+    def timercount(self):
+        if self.count:
+            if self.sec <= 0 and self.min <= 0:
+                self.matchstop()
+                self.round += 1
+                self.roundlabel['text'] = 'Round ' + str(self.round)
+                self.min = self.minset
+                self.sec = self.secset
+                self.timerlabel['text'] = str(self.min) + ':' + str(self.sec)
+                if self.round > self.roundnum:
+                    self.matchstartbtn['state'] = 'disabled'
 
-                if (self.sec < 0):
+            else:
+                if self.sec < 0:
                     self.sec = 59
                     self.min -= 1
-                self.timerlabel['text'] = str(self.min) +':' + str(self.sec)
+                self.timerlabel['text'] = str(self.min) + ':' + str(self.sec)
                 self.sec -= 1
-                self.timerlabel.after(1000, count)
-
-        count()
+                self.timerlabel.after(1000, self.timercount)
 
     def matchstop(self):
         self.count = False
@@ -261,6 +270,8 @@ class Application(Frame):
 
     def createentry(self):
         self.subwindow = Frame(self)
+        self.subwindow['borderwidth'] = 2
+        self.subwindow['relief'] = 'groove'
         self.subwindow.grid(row=1, column=3)
         self.bluenameentrylabel = Label(self.subwindow,
                                         text="Blue Team Name")
@@ -273,15 +284,15 @@ class Application(Frame):
         self.rednameentry = Entry(self.subwindow)
         self.rednameentry.grid(row=1, column=1)
         self.roundentrylabel = Label(self.subwindow,
-                                        text="Rounds")
+                                     text="Rounds")
         self.roundentrylabel.grid(row=2, column=0)
         self.roundentry = Entry(self.subwindow)
         self.roundentry.grid(row=2, column=1)
         self.timeentrylabel = Label(self.subwindow,
-                                       text="Time of Round")
+                                    text="Time of Round")
         self.timeentrylabel.grid(row=3, column=0)
         self.minentrylabel = Label(self.subwindow,
-                                    text="Min")
+                                   text="Min")
         self.minentrylabel.grid(row=4, column=0)
         self.minentry = Entry(self.subwindow)
         self.minentry.grid(row=4, column=1)
@@ -290,23 +301,28 @@ class Application(Frame):
         self.secentrylabel.grid(row=5, column=0)
         self.secentry = Entry(self.subwindow)
         self.secentry.grid(row=5, column=1)
-        self.commitbtn = Button(self.subwindow, text='Commit', command=self.inputcommit)
-        self.commitbtn.grid(row=6,column=1)
-        self.resetbtn = Button(self.subwindow, text='Reset', command=self.reset)
+        self.commitbtn = Button(self.subwindow,
+                                text='Commit',
+                                command=self.inputcommit)
+        self.commitbtn.grid(row=6, column=1)
+        self.resetbtn = Button(self.subwindow,
+                               text='Reset',
+                               command=self.reset)
         self.resetbtn.grid(row=6, column=0)
 
     def inputcommit(self):
         self.matchstartbtn['state'] = 'normal'
         self.commitbtn['state'] = 'disable'
-        self.blueteamname = self.bluenameentry.get()
-        self.bluenamelabel['text'] = 'Blue' if self.blueteamname == '' else self.blueteamname
-        self.redteamname = self.rednameentry.get()
-        self.rednamelabel['text'] = 'Red' if self.redteamname == '' else self.redteamname
-        self.roundnum = int(self.roundentry.get() if self.roundentry.get()!='' else 1)
+        self.blueteamname = 'Blue' if self.bluenameentry.get() == '' else self.bluenameentry.get()
+        self.bluenamelabel['text'] = self.blueteamname
+        self.redteamname = 'Red' if self.rednameentry.get() == '' else self.rednameentry.get()
+        self.rednamelabel['text'] = self.redteamname
+        self.roundnum = int(self.roundentry.get() if digitaldetect(self.roundentry.get()) else 1)
         self.roundlabel['text'] = 'Round ' + str(self.round)
-        self.minset = self.min = int(self.minentry.get() if self.minentry.get()!='' else 0)
-        self.secset = self.sec = int(self.secentry.get() if self.secentry.get()!='' else 0)
+        self.minset = self.min = int(self.minentry.get() if digitaldetect(self.minentry.get()) else 0)
+        self.secset = self.sec = int(self.secentry.get() if digitaldetect(self.secentry.get()) else 0)
         self.timerlabel['text'] = str(self.min) + ':' + str(self.sec)
+        self.infoupdate()
 
     def reset(self):
         self.blueteamname = ''
@@ -343,6 +359,39 @@ class Application(Frame):
         self.redfoulbtn['state'] = 'disabled'
         self.matchstartbtn['state'] = 'disable'
         self.matchstopbtn['state'] = 'disable'
+        self.inforeset()
+
+    def createinfowindow(self):
+        self.infowindow = Frame(self)
+        self.infowindow.grid(row=2, column=3)
+        self.infolabel = Label(self.infowindow, font="Consolas 15 bold")
+        self.infolabel.grid(row=0, column=0)
+        self.blueinfo = Label(self.infowindow)
+        self.blueinfo.grid(row=1, column=0)
+        self.redinfo = Label(self.infowindow)
+        self.redinfo.grid(row=2, column=0)
+        self.roundinfo = Label(self.infowindow)
+        self.roundinfo.grid(row=3, column=0)
+        self.mininfo = Label(self.infowindow)
+        self.mininfo.grid(row=4, column=0)
+        self.secinfo = Label(self.infowindow)
+        self.secinfo.grid(row=5, column=0)
+
+    def infoupdate(self):
+        self.infolabel['text'] = 'Info'
+        self.blueinfo['text'] = 'Blue Team Name : ' + str(self.blueteamname)
+        self.redinfo['text'] = 'Red Team Name : ' + str(self.redteamname)
+        self.roundinfo['text'] = 'Rounds : ' + str(self.roundnum)
+        self.mininfo['text'] = 'Min : ' + str(self.minset)
+        self.secinfo['text'] = 'Sec : ' + str(self.secset)
+
+    def inforeset(self):
+        self.infolabel['text'] = ''
+        self.blueinfo['text'] = ''
+        self.redinfo['text'] = ''
+        self.roundinfo['text'] = ''
+        self.mininfo['text'] = ''
+        self.secinfo['text'] = ''
 
 
 root = Tk()
