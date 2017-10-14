@@ -1,7 +1,10 @@
 from tkinter import *
+import serial
 
 
 def digitaldetect(str):
+    if str == '':
+        return False
     for i in str:
         if i < '0' or i > '9':
             return False
@@ -185,41 +188,49 @@ class Application(Frame):
         if self.count:
             self.bluescore += 1
             self.bluescorelabel['text'] = self.bluescore
+            ser.write(b'1')
 
     def blueplus2(self):
         if self.count:
             self.bluescore += 2
             self.bluescorelabel['text'] = self.bluescore
+            ser.write(b'2')
 
     def blueplus3(self):
         if self.count:
             self.bluescore += 3
             self.bluescorelabel['text'] = self.bluescore
+            ser.write(b'3')
 
     def bluefouladd(self):
         if self.count:
             self.bluefoul += 1
             self.bluefoullabel['text'] = self.bluefoul
+            ser.write(b'4')
 
     def redplus1(self):
         if self.count:
             self.redscore += 1
             self.redscorelabel['text'] = self.redscore
+            ser.write(b'5')
 
     def redplus2(self):
         if self.count:
             self.redscore += 2
             self.redscorelabel['text'] = self.redscore
+            ser.write(b'6')
 
     def redplus3(self):
         if self.count:
             self.redscore += 3
             self.redscorelabel['text'] = self.redscore
+            ser.write(b'7')
 
     def redfouladd(self):
         if self.count:
             self.redfoul += 1
             self.redfoullabel['text'] = self.redfoul
+            ser.write(b'8')
 
     def matchstart(self):
         self.count = True
@@ -234,6 +245,7 @@ class Application(Frame):
         self.red3btn['state'] = 'normal'
         self.redfoulbtn['state'] = 'normal'
         self.timercount()
+        ser.write(b'9')
 
     def timercount(self):
         if self.count:
@@ -267,6 +279,7 @@ class Application(Frame):
         self.red2btn['state'] = 'disabled'
         self.red3btn['state'] = 'disabled'
         self.redfoulbtn['state'] = 'disabled'
+        ser.write(b'0')
 
     def createentry(self):
         self.subwindow = Frame(self)
@@ -315,13 +328,23 @@ class Application(Frame):
         self.commitbtn['state'] = 'disable'
         self.blueteamname = 'Blue' if self.bluenameentry.get() == '' else self.bluenameentry.get()
         self.bluenamelabel['text'] = self.blueteamname
+        # ser.write(b'a' + self.blueteamname)
+        ser.write(b'a')
         self.redteamname = 'Red' if self.rednameentry.get() == '' else self.rednameentry.get()
         self.rednamelabel['text'] = self.redteamname
+        # ser.write(b'b' + self.redteamname)
+        ser.write(b'b')
         self.roundnum = int(self.roundentry.get() if digitaldetect(self.roundentry.get()) else 1)
         self.roundlabel['text'] = 'Round ' + str(self.round)
+        # ser.write(b'c' + str(self.round))
+        ser.write(b'c')
         self.minset = self.min = int(self.minentry.get() if digitaldetect(self.minentry.get()) else 0)
         self.secset = self.sec = int(self.secentry.get() if digitaldetect(self.secentry.get()) else 0)
         self.timerlabel['text'] = str(self.min) + ':' + str(self.sec)
+        # ser.write(b'd' + str(self.min))
+        # ser.write(b'e' + str(self.sec))
+        ser.write(b'd')
+        ser.write(b'e')
         self.infoupdate()
 
     def reset(self):
@@ -360,6 +383,7 @@ class Application(Frame):
         self.matchstartbtn['state'] = 'disable'
         self.matchstopbtn['state'] = 'disable'
         self.inforeset()
+        ser.write(b'f')
 
     def createinfowindow(self):
         self.infowindow = Frame(self)
@@ -394,6 +418,10 @@ class Application(Frame):
         self.secinfo['text'] = ''
 
 
+ser = serial.Serial()
+ser.baudrate = 9600
+ser.port = 'COM15'
+ser.open()
 root = Tk()
 app = Application(root)
 mainloop()
